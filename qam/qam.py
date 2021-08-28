@@ -30,25 +30,27 @@ class QuadratureAmplitudeModulation:
         grey_values = []
         for i in range(0, len(message), self.number_bits):
             grey_values.append(''.join(message[i:i + self.number_bits]))
-
         return grey_values
 
-    def modulation(self, message, sampling_rate, bit_time, central_frequency):
+    def _build_signal_message(self, message, bit_rate, sampling_rate):
+        bit_time = 1 / bit_rate
+        pulse = np.repeat(message, int(bit_time * sampling_rate))
+        return np.arange(len(pulse))/1e6, pulse
+
+    def modulation(self, t,  message, central_frequency):
         rest_of_division = len(message) % self.number_bits
         if not rest_of_division == 0:
             message = [0] * rest_of_division + message
 
         grey_values = self.convert_to_grey_value(message)
-        t = np.arange(0, bit_time * len(grey_values) - 1 / sampling_rate, 1 / sampling_rate)
-        signal = np.zeros(len(t))
-        step = int(bit_time * sampling_rate)
         t1 = 0
+        step = int(len(t)*self.number_bits/len(message))
+        signal = np.zeros(len(t))
         for values in grey_values:
             index = self.gray_code.index(values)
             signal[t1:t1 + step] = self.constellation[0][index] * np.cos(
-                2 * pi * central_frequency * t[t1:t1 + step]) + \
+                2 * pi * central_frequency * t[t1:t1 + step]) - \
                                    self.constellation[1][index] * np.sin(
                 2 * pi * central_frequency * t[t1:t1 + step])
             t1 += step
-        pulse = np.repeat(message, int(bit_time * sampling_rate) / 4)
-        return signal, t, pulse
+        return signal
