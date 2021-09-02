@@ -35,19 +35,17 @@ class QuadratureAmplitudeModulation:
             grey_values.append(''.join(message[i:i + self.number_bits]))
         return grey_values
 
-    @staticmethod
-    def _build_signal_message(message, bit_rate, sampling_rate):
-        bit_time = 1 / bit_rate
-        pulse = np.repeat(message, int(bit_time * sampling_rate))
-        return np.linspace(0, len(pulse) / sampling_rate, len(pulse), endpoint=False), pulse
-
-    def modulation(self, t, message, central_frequency):
+    def _build_signal_message(self, message, bit_rate, sampling_rate):
         rest_of_division = len(message) % self.number_bits
         if not rest_of_division == 0:
-            list_of_zeros = ([0] * (self.number_bits-rest_of_division))
+            list_of_zeros = ([0] * (self.number_bits - rest_of_division))
             list_of_zeros.extend(message)
-            message = list_of_zeros
+            message = np.array(list_of_zeros)
+        bit_time = 1 / bit_rate
+        pulse = np.repeat(message, int(bit_time * sampling_rate))
+        return np.linspace(0, len(pulse) / sampling_rate, len(pulse), endpoint=False), pulse, message
 
+    def modulation(self, t, message, central_frequency):
         grey_values = self.convert_to_grey_value(message)
         step = int(len(t) * self.number_bits / len(message))
         index_list = []
