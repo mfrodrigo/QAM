@@ -28,13 +28,14 @@ print(qam_modulator.gray_code)
 # ])
 # message = np.array([0, 0, 0, 1, 1, 0, 1, 1])
 print(message)
-t, pulse = qam_modulator._build_signal_message(message, 10e3, 1e6)
+t, pulse, message = qam_modulator._build_signal_message(message, 10e3, 1e6)
 # Plotter.plotter_line(t, pulse)
 qam_signal = qam_modulator.modulation(t, message, 20e3)
 fft_qam_signal = fft(qam_signal)[:len(qam_signal) // 2]
 fs = fftfreq(len(qam_signal), 1 / 1e6)[:len(qam_signal) // 2]
 # Plotter.plotter_line(fs, np.abs(fft_qam_signal))
-# Plotter.plotter_line(t, [qam_signal, pulse])
+Plotter.plotter_line(t, [qam_signal, pulse], xlabel='tempo (s)', ylabel='tensão (volts)',
+                    names= ['sinal modulado', 'mensagem'])
 # add noise in signal
 qam_signal = qam_modulator.add_noise(qam_signal, -5)
 fft_qam_signal = fft(qam_signal)[:len(qam_signal) // 2]
